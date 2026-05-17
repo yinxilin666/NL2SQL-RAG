@@ -7,8 +7,8 @@ from ui.utils.state import add_assistant_message, add_user_message
 
 
 def render_chat():
-    st.title("NL2SQL RAG — Hive Query Assistant")
-    st.caption("Ask questions about your data in natural language and get HiveQL SQL.")
+    st.title("NL2SQL — Hive 查询助手")
+    st.caption("用自然语言提问，自动生成 HiveSQL 查询语句")
 
     # Display message history
     for msg in st.session_state.messages:
@@ -17,7 +17,7 @@ def render_chat():
                 st.markdown(msg["content"])
             else:
                 if msg.get("reasoning") and st.session_state.show_reasoning:
-                    with st.expander(" Reasoning process"):
+                    with st.expander(" 推理过程"):
                         st.markdown(msg["reasoning"])
 
                 st.code(msg["sql"], language="sql")
@@ -25,9 +25,9 @@ def render_chat():
                 # Metadata
                 meta_parts = []
                 if msg.get("tables"):
-                    meta_parts.append(f"Tables: {', '.join(msg['tables'])}")
+                    meta_parts.append(f"涉及表: {', '.join(msg['tables'])}")
                 if msg.get("elapsed"):
-                    meta_parts.append(f"Time: {msg['elapsed']:.0f}ms")
+                    meta_parts.append(f"耗时: {msg['elapsed']:.0f}ms")
                 if msg.get("warnings"):
                     for w in msg["warnings"]:
                         st.warning(f" {w}")
@@ -36,11 +36,11 @@ def render_chat():
                     st.caption(" | ".join(meta_parts))
 
     # Chat input
-    if prompt := st.chat_input("Ask a question about your Hive data..."):
+    if prompt := st.chat_input("请输入您关于 Hive 数据的查询问题..."):
         add_user_message(prompt)
 
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
+            with st.spinner("思考中..."):
                 try:
                     response = asyncio.run(query_nl2sql(
                         question=prompt,
@@ -50,17 +50,17 @@ def render_chat():
                         few_shot=st.session_state.few_shot,
                     ))
                 except Exception as e:
-                    st.error(f"Error: {e}")
+                    st.error(f"请求失败: {e}")
                     return
 
-            sql = response.get("sql", "-- Error generating SQL")
+            sql = response.get("sql", "-- SQL 生成失败")
             reasoning = response.get("reasoning")
             tables = response.get("retrieved_tables", [])
             warnings = response.get("warnings", [])
             elapsed = response.get("execution_time_ms", 0)
 
             add_assistant_message(
-                content="Generated SQL:",
+                content="生成的 SQL:",
                 sql=sql,
                 reasoning=reasoning,
                 tables=tables,
@@ -70,7 +70,7 @@ def render_chat():
 
             # Display current response
             if reasoning and st.session_state.show_reasoning:
-                with st.expander(" Reasoning process"):
+                with st.expander(" 推理过程"):
                     st.markdown(reasoning)
 
             st.code(sql, language="sql")
@@ -81,8 +81,8 @@ def render_chat():
 
             meta_parts = []
             if tables:
-                meta_parts.append(f"Tables: {', '.join(tables)}")
+                meta_parts.append(f"涉及表: {', '.join(tables)}")
             if elapsed:
-                meta_parts.append(f"Time: {elapsed:.0f}ms")
+                meta_parts.append(f"耗时: {elapsed:.0f}ms")
             if meta_parts:
                 st.caption(" | ".join(meta_parts))

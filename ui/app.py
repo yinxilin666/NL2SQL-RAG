@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import streamlit as st
 
 st.set_page_config(
-    page_title="NL2SQL RAG",
+    page_title="NL2SQL 智能查询",
     page_icon="",
     layout="wide",
 )
