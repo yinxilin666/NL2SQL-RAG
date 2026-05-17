@@ -6,6 +6,18 @@ from ui.utils.api_client import get_rules, get_schema, health_check, reindex
 
 
 def render_sidebar():
+    # Auto-load schema and rules on first open
+    if not st.session_state._initial_data_loaded:
+        try:
+            st.session_state.tables = asyncio.run(get_schema())
+        except Exception:
+            pass
+        try:
+            st.session_state.table_rules = asyncio.run(get_rules())
+        except Exception:
+            pass
+        st.session_state._initial_data_loaded = True
+
     with st.sidebar:
         st.header(" 配置")
 

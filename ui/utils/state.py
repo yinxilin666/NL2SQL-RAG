@@ -3,8 +3,8 @@ import streamlit as st
 
 DEFAULTS = {
     "model": "deepseek-r1:8b",
-    "top_k": 8,
-    "temperature": 0.1,
+    "top_k": 30,
+    "temperature": 0.9,
     "show_reasoning": False,
     "few_shot": True,
 }
@@ -13,6 +13,9 @@ DEFAULTS = {
 def init_session_state():
     if "messages" not in st.session_state:
         st.session_state.messages = []
+
+    if "_initial_data_loaded" not in st.session_state:
+        st.session_state._initial_data_loaded = False
 
     for key, default in DEFAULTS.items():
         if key not in st.session_state:

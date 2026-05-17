@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     bm25_index_path: str = "data/bm25_index/bm25.pkl"
     excel_input_path: str = "data/input/schema.xlsx"
     table_rules_path: str = "data/table_rules.json"
-    top_k: int = 8
-    llm_temperature: float = 0.1
+    top_k: int = 30
+    llm_temperature: float = 0.9
 
     model_config = {"env_file": ".env"}
