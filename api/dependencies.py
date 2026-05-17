@@ -1,6 +1,7 @@
 from functools import lru_cache
 
 from config.settings import Settings
+from config.table_rules import TableRules
 from ingestion.embedder import OllamaEmbedder
 from llm.ollama_client import OllamaClient
 from retrieval.bm25_retriever import BM25Retriever
@@ -42,6 +43,11 @@ def get_hybrid_retriever() -> HybridRetriever:
         embedder=get_embedder(),
         top_k=s.top_k,
     )
+
+
+def get_table_rules() -> TableRules:
+    s = _get_settings()
+    return TableRules(file_path=s.table_rules_path)
 
 
 def get_llm() -> OllamaClient:

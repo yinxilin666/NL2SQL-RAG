@@ -8,6 +8,7 @@ class QueryResponse(BaseModel):
     reasoning: Optional[str] = None
     retrieved_tables: list[str] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
+    applied_rules: list[dict] = Field(default_factory=list)
     execution_time_ms: float
 
 

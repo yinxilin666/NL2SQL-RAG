@@ -66,6 +66,7 @@ def build_prompt(
     user_query: str,
     retrieved_chunks: List[dict],
     few_shot: bool = True,
+    table_rules: list[dict] | None = None,
 ) -> str:
     tables_seen: set[str] = set()
     schema_lines: list[str] = []
@@ -90,6 +91,14 @@ def build_prompt(
     relationship_context = "\n".join(rel_lines) if rel_lines else "No cross-table relationships identified."
 
     prompt_parts = [SYSTEM_PROMPT]
+
+    if table_rules:
+        rules_lines = [
+            f"- For table `{r['table']}`: {r['condition']} ({r.get('description', 'no description')})"
+            for r in table_rules
+        ]
+        rules_section = "=== TABLE-SPECIFIC RULES (MUST BE APPLIED) ===\n" + "\n".join(rules_lines)
+        prompt_parts.append(rules_section)
 
     if few_shot:
         prompt_parts.append(FEW_SHOT_EXAMPLES)

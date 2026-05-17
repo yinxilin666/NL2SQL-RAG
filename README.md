@@ -179,6 +179,7 @@ python -m scripts.ingest --file data/input/schema_v2.xlsx
 | `GET` | `/api/health` | 健康检查 |
 | `POST` | `/api/query` | 自然语言转 SQL（核心） |
 | `GET` | `/api/schema` | 查看已加载的表列表 |
+| `GET` | `/api/rules` | 查看表级规则 |
 | `POST` | `/api/reindex` | 重新摄入 Excel（增量更新） |
 
 ### POST /api/query 示例
@@ -221,6 +222,50 @@ curl -X POST http://localhost:8000/api/query \
 
 ---
 
+## 表级规则配置
+
+部分表在查询时需要固定带上某些过滤条件（例如只查有效数据 `vali_flag = '1'`），手动每次输入既繁琐又容易遗漏。通过表级规则功能，可以为指定的表预设查询条件，系统在生成 SQL 时自动注入，无需重复输入。
+
+### 配置规则
+
+编辑 `data/table_rules.json`：
+
+```json
+{
+  "rules": [
+    {
+      "table": "",
+      "condition": "",
+      "description": ""
+    }
+  ]
+}
+```
+
+每项规则的字段说明：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `table` | string | 是 | 表名，与 Excel 中 `table` 列保持一致 |
+| `condition` | string | 是 | SQL WHERE 条件，会自动拼接到查询中 |
+| `description` | string | 否 | 规则说明，方便维护和理解 |
+
+### 工作原理
+
+1. 用户输入自然语言问题
+2. 混合检索召回相关的 schema 片段，识别出涉及的表名
+3. 自动匹配 `table_rules.json` 中对应表的规则
+4. 在 LLM 提示词中注入规则（以 `TABLE-SPECIFIC RULES (MUST BE APPLIED)` 区块呈现）
+5. LLM 生成 SQL 时强制应用这些条件
+
+### 查看与验证
+
+- **UI 侧边栏**：点击「加载规则」按钮可查看所有已配置规则
+- **查询响应**：每次查询结果的元数据中会展示本次应用了哪些规则（`已应用规则: xxx`）
+- **API 接口**：`GET /api/rules` 返回所有规则列表
+
+---
+
 ## 项目目录结构
 
 ```
@@ -229,10 +274,12 @@ nl2sql-rag/
 ├── requirements.txt              # Python 依赖
 ├── config/                       # 配置层
 │   ├── settings.py               # Pydantic 配置（读取 .env）
-│   └── constants.py              # 常量定义
+│   ├── constants.py              # 常量定义
+│   └── table_rules.py            # 表级规则加载器
 ├── data/
 │   ├── input/                    # 放置 Excel 文件
 │   │   └── schema.xlsx
+│   └── table_rules.json           # 表级规则配置
 │   ├── chromadb/                 # ChromaDB 持久化（自动生成）
 │   └── bm25_index/               # BM25 索引 pickle（自动生成）
 ├── ingestion/                    # 数据摄入层
@@ -256,6 +303,7 @@ nl2sql-rag/
 │   │   ├── query.py              # POST /api/query
 │   │   ├── health.py             # GET /api/health
 │   │   ├── schema.py             # GET /api/schema
+│   │   ├── rules.py              # GET /api/rules
 │   │   └── reindex.py            # POST /api/reindex
 │   └── schemas/                  # Pydantic 模型
 ├── ui/                           # UI 层

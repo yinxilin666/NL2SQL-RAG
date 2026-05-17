@@ -27,7 +27,8 @@ def add_user_message(content: str):
 
 
 def add_assistant_message(content: str, sql: str, reasoning: str | None,
-                           tables: list[str], warnings: list[str], elapsed: float):
+                           tables: list[str], warnings: list[str], elapsed: float,
+                           applied_rules: list[dict] | None = None):
     st.session_state.messages.append({
         "role": "assistant",
         "content": content,
@@ -36,4 +37,5 @@ def add_assistant_message(content: str, sql: str, reasoning: str | None,
         "tables": tables,
         "warnings": warnings,
         "elapsed": elapsed,
+        "applied_rules": applied_rules or [],
     })

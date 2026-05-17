@@ -34,6 +34,13 @@ async def get_schema() -> list[dict]:
         return resp.json().get("tables", [])
 
 
+async def get_rules() -> list[dict]:
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.get(f"{BACKEND_URL}/api/rules")
+        resp.raise_for_status()
+        return resp.json().get("rules", [])
+
+
 async def reindex(excel_path: str | None = None, incremental: bool = True) -> dict:
     async with httpx.AsyncClient(timeout=300.0) as client:
         resp = await client.post(

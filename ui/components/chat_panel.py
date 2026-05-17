@@ -26,6 +26,9 @@ def render_chat():
                 meta_parts = []
                 if msg.get("tables"):
                     meta_parts.append(f"涉及表: {', '.join(msg['tables'])}")
+                if msg.get("applied_rules"):
+                    rule_descs = [f"{r['table']}({r['condition']})" for r in msg["applied_rules"]]
+                    meta_parts.append(f"已应用规则: {', '.join(rule_descs)}")
                 if msg.get("elapsed"):
                     meta_parts.append(f"耗时: {msg['elapsed']:.0f}ms")
                 if msg.get("warnings"):
@@ -58,6 +61,7 @@ def render_chat():
             tables = response.get("retrieved_tables", [])
             warnings = response.get("warnings", [])
             elapsed = response.get("execution_time_ms", 0)
+            applied_rules = response.get("applied_rules", [])
 
             add_assistant_message(
                 content="生成的 SQL:",
@@ -66,6 +70,7 @@ def render_chat():
                 tables=tables,
                 warnings=warnings,
                 elapsed=elapsed,
+                applied_rules=applied_rules,
             )
 
             # Display current response
@@ -82,6 +87,9 @@ def render_chat():
             meta_parts = []
             if tables:
                 meta_parts.append(f"涉及表: {', '.join(tables)}")
+            if applied_rules:
+                rule_descs = [f"{r['table']}({r['condition']})" for r in applied_rules]
+                meta_parts.append(f"已应用规则: {', '.join(rule_descs)}")
             if elapsed:
                 meta_parts.append(f"耗时: {elapsed:.0f}ms")
             if meta_parts:

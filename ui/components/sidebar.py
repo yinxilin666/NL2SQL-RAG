@@ -2,7 +2,7 @@ import asyncio
 
 import streamlit as st
 
-from ui.utils.api_client import get_schema, health_check, reindex
+from ui.utils.api_client import get_rules, get_schema, health_check, reindex
 
 
 def render_sidebar():
@@ -67,6 +67,24 @@ def render_sidebar():
                     st.caption(f"子系统: {t.get('subs_code', 'N/A')}")
         else:
             st.caption("暂无表信息，请点击「刷新数据表」")
+
+        st.divider()
+
+        st.header(" 表级规则")
+
+        if st.button(" 加载规则"):
+            try:
+                st.session_state.table_rules = asyncio.run(get_rules())
+            except Exception as e:
+                st.error(f"加载规则失败: {e}")
+
+        if "table_rules" in st.session_state and st.session_state.table_rules:
+            for rule in st.session_state.table_rules:
+                st.caption(f"**{rule['table']}** → `{rule['condition']}`")
+                if rule.get("description"):
+                    st.caption(f"_{rule['description']}_")
+        else:
+            st.caption("暂无表级规则，请在 data/table_rules.json 中配置")
 
         st.divider()
 

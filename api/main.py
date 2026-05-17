@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers import health, query, reindex, schema
+from api.routers import health, query, reindex, rules, schema
 
 
 @asynccontextmanager
@@ -24,6 +24,7 @@ app.include_router(health.router)
 app.include_router(query.router)
 app.include_router(schema.router)
 app.include_router(reindex.router)
+app.include_router(rules.router)
 
 
 @app.get("/")
